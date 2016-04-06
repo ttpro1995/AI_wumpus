@@ -78,25 +78,31 @@ class AppGui:
                 thing_str = ""  # string of thing's name
                 cur_cell = self._widgets[i][j]
 
-                if (cur_cell.is_reveal):
-                    cur_cell.config(background="pink")
+                if cur_cell.is_reveal:
+                    cur_cell.config(background="pink") # set reveal cell (except one with explorer to pink)
 
+                # loop through all object
                 for thing in thing_list:
                     thing_name = thing.__class__.__name__
-                    if(thing_name is "Explorer"):
-                        cur_cell.is_reveal = True # reveal the current position of player
-                        cur_cell.config(background="red")
 
-                    if (thing_name is "Wall"):
+                    # Reveal cell if Explorer (player) stand in that cell
+                    if thing_name is "Explorer":
+                        cur_cell.is_reveal = True  # reveal the current position of player
+                        cur_cell.config(background="red") # set it to red
+
+                    # set cell to black at wall
+                    if thing_name is "Wall":
                         cur_cell.config(background="black")
 
-                    elif (cur_cell.is_reveal):
-                        if(thing_name is not "Explorer"):
-                            cur_cell.config(background="pink")
-                            thing_str += thing_name + "\n"  # print string at current location
+                    if thing_name is not "Explorer": # we indicate explore as red, so no need to write here
+                        thing_str += thing_name + "\n"  # append list of object into string
 
+                # config cell
+                if cur_cell.is_reveal:
+                    cur_cell.config(text=thing_str)
+                else:
+                    cur_cell.config(text="")
 
-                cur_cell.config(text = thing_str)
 
 
     def Forward(self):

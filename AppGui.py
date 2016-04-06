@@ -76,6 +76,7 @@ class AppGui:
         messagebox.showinfo("You lose", "Explore is dead.\nBetter luck next time.")
 
     def updateGUI(self):
+        print(self.agent.location)
         # test reveal
         # for i in range(0, self.env.x_end + 1):
         #     for j in range(0, self.env.y_end + 1):
@@ -83,7 +84,7 @@ class AppGui:
 
         for i in range( 0,  self.env.x_end+1):
             for j in range( 0,  self.env.y_end+1):
-                print("At ", i, " ", j, " = ")
+                # print("At ", i, " ", j, " = ")
                 thing_list =  self.env.list_things_at((i, j))  # get array of thing at location (i,j)
                 thing_str = ""  # string of thing's name
                 cur_cell = self._widgets[i][j]

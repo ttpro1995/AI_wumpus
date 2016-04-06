@@ -10,7 +10,7 @@ class AppGui:
         agents = env.agents
         if len(agents) is 1:
             self.agent = agents[0]
-        else :
+        else:
             self.agent = agents[1]
 
         master.bind('<Left>',self.MoveLeft)
@@ -19,39 +19,40 @@ class AppGui:
         master.bind('<Down>',self.MoveDown)
         # the master frame
         self.frame = Frame(master)
-        self.frame.grid()
+        self.frame.pack()
+        #self.frame.grid()
 
         self.toolbar = Frame(master);
-        self.toolbar.grid(row = 0)
+        #self.toolbar.grid(row = 0, column = 0)
+        self.toolbar.pack()
 
         self.bot_frame = Frame(master,background="black")
-        self.bot_frame.grid(row = 4)
+        #self.bot_frame.grid(row = 4, column = 0)
+        self.bot_frame.pack()
 
         self.button = Button(self.toolbar, text="Quit", fg="red", command=self.frame.quit)
-        self.button.grid(row = 0, column= 5 , padx = 30)
+        self.button.grid(row = 0, column=4 )
 
         self.show = Button(self.toolbar, text="Show", command=self.updateGUI)
-        self.show.grid(row = 0, column = 0, padx = 40)
+        self.show.grid(row = 2, column = 0)
+
+        self.reveal_bt = Button(self.toolbar, text="Reveal All", command=self.reveal_all)
+        self.reveal_bt.grid(row=2, column=1)
+
+        #  self.reset_bt = Button(self.toolbar, text="Reveal All", command=self.updateGUI)
+        #  self.reset_bt.grid(row=2, column=2)
 
         self.moveLeft = Button(self.toolbar, text="Left", command=self.MoveLeft)
-        self.moveLeft.grid(row = 0, column = 1)
+        self.moveLeft.grid(row = 0, column = 0)
 
         self.moveRight = Button(self.toolbar, text="Right", command=self.MoveRight)
-        self.moveRight.grid(row = 0, column = 3)
+        self.moveRight.grid(row = 0, column = 2)
 
         self.moveUp = Button(self.toolbar, text="Up", command=self.MoveUp)
-        self.moveUp.grid(row = 0, column = 2)
+        self.moveUp.grid(row=0, column=1)
 
         self.moveDown = Button(self.toolbar, text="Down", command=self.MoveDown)
-        self.moveDown.grid(row = 1, column = 2)
-
-
-
-        #self.can = Canvas(self.bot_frame)
-        #self.can.grid(row=0, column=0)
-        #photo = PhotoImage(file='apple.gif')
-        #self.can.photo = photo
-        #self.can.create_image(0, 0, image=photo)
+        self.moveDown.grid(row = 1, column = 1)
 
         self._widgets = []
         for r in range(0,self.env.x_end +1):
@@ -63,7 +64,16 @@ class AppGui:
                 label.is_reveal = False
                 cur_row.append(label)
             self._widgets.append(cur_row)
+        self.updateGUI()  # Update UI at start of game
 
+    def reveal_all(self):
+        for i in range(0, self.env.x_end + 1):
+             for j in range(0, self.env.y_end + 1):
+                 self._widgets[i][j].is_reveal = True
+        self.updateGUI()
+
+    def lose_message(self):
+        messagebox.showinfo("You lose", "Explore is dead.\nBetter luck next time.")
 
     def updateGUI(self):
         # test reveal
@@ -102,7 +112,8 @@ class AppGui:
                     cur_cell.config(text=thing_str)
                 else:
                     cur_cell.config(text="")
-
+        if self.env.in_danger(self.agent):
+            self.lose_message()
 
 
     def Forward(self):

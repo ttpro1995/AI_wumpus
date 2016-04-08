@@ -77,6 +77,15 @@ class AppGui:
 
     def updateGUI(self):
         print(self.agent.location)
+        if (self.agent.direction.direction == Direction.R):
+            print('R')
+        if (self.agent.direction.direction == Direction.L):
+            print('L')
+        if (self.agent.direction.direction == Direction.U):
+            print('U')
+        if (self.agent.direction.direction == Direction.D):
+            print('D')
+
         # test reveal
         # for i in range(0, self.env.x_end + 1):
         #     for j in range(0, self.env.y_end + 1):

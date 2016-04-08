@@ -1,8 +1,14 @@
 from agents import *
 from AppGui import *
+from wumpus_map import *
+
 
 def main():
-    wumpus_env = WumpusEnvironment(agent_program=None, width=10, height=10) #init the wumpus environment
+
+    map = MapReader("wumpus_map.txt")
+
+
+    wumpus_env = WumpusEnvironment(agent_program=None, width=map.width+2, height=map.height+2, map_reader=map) #init the wumpus environment
 
     # loop though
     for i in range(wumpus_env.x_start,wumpus_env.x_end):

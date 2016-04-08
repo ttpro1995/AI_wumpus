@@ -300,7 +300,7 @@ class Environment(object):
         for it. (Shouldn't need to override this."""
         if not isinstance(thing, Thing):
             thing = Agent(thing)
-        assert thing not in self.things, "Don't add the same thing twice"
+        assert thing not in self.things, "Don't add the same thing twice"+thing.__class__.__name__
         thing.location = location if location is not None else self.default_location(thing)
         self.things.append(thing)
         if isinstance(thing, Agent):
@@ -651,9 +651,51 @@ class Explorer(Agent):
 class WumpusEnvironment(XYEnvironment):
     pit_probability = 0.2 #Probability to spawn a pit in a location. (From Chapter 7.2)
     #Room should be 4x4 grid of rooms. The extra 2 for walls
-    def __init__(self, agent_program, width=6, height=6):
+
+    def __init__(self, agent_program, width=6, height=6, map_reader = None):
         super(WumpusEnvironment, self).__init__(width, height)
-        self.init_world(agent_program)
+        if (map_reader is None):
+            self.init_world(agent_program)
+        else:
+            self.init_world_by_map(agent_program,map_reader=map_reader)
+
+
+    def init_world_by_map(self, agent_program, map_reader):
+        "WALLS"
+        self.add_walls()
+
+        w = map_reader.width
+        h = map_reader.height
+        matrix = map_reader.getMap()
+
+        for i in range(w):
+            for j in range(h):
+                item = int(matrix[i,j])
+                x = i + 1
+                y = j + 1
+                if item is 1:  # Add Pit
+                    print('add pit at ',x,y)
+                    self.add_thing(Pit(), (x,y), True)
+                    self.add_thing(Breeze(), (x - 1,y), True)
+                    self.add_thing(Breeze(), (x,y - 1), True)
+                    self.add_thing(Breeze(), (x + 1,y), True)
+                    self.add_thing(Breeze(), (x,y + 1), True)
+                if item is 2:  # Add Wumpus
+                    print('add wumpus at ', x, y)
+                    self.add_thing(Wumpus(), (x,y), True)
+                    self.add_thing(Stench(), (x - 1,y), True)
+                    self.add_thing(Stench(), (x,y - 1), True)
+                    self.add_thing(Stench(), (x + 1,y), True)
+                    self.add_thing(Stench(), (x,y + 1), True)
+                if item is 3:  # Add Gold
+                    print('add gold at ', x, y)
+                    self.add_thing(Gold(),(x,y),True)
+
+        "AGENT"
+        self.add_thing(Explorer(), (1, 1), True)
+
+
+
 
     def init_world(self, program):
         '''Spawn items to the world based on probabilities from the book'''

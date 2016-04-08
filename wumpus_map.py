@@ -1,4 +1,5 @@
 import copy
+import numpy
 class MapReader:
     """ Read a text file which is map for wumpus game
         the text file is this
@@ -10,30 +11,29 @@ class MapReader:
         0 0 0 3
 
         1: pit
-        2: wumpus
-        3: gold
+        2: wumpus (only one wumpus)
+        3: gold (only one gold)
     """
-    def __init__(self):
+    def __init__(self, fname):
         self.width = 0
         self.height = 0
-        self.matrix = []
+        self.fname = fname
+        self.file_len(fname)
+        self.read_map()
+        self.transpose_map()
 
-    def read(self,fname):
-        f = open(fname)
-        self.height = self.file_len(fname)
+    def read_map(self):
+        fname = self.fname
+        f = open(fname).read()
+        self.matrix = numpy.zeros(shape=(self.height, self.width))
+        lines = f.splitlines()
+        for i in range(self.height):
+            a_line = lines[i]
+            words = a_line.split()
+            for j in range(self.width):
+                self.matrix[i,j] = words[j]
 
-        i = 0;
-        j = 0;
-        for line in f:
-            line_m = []
-            line = line.rstrip('\n')
-            words = line.split()
-            for w in words:
-                self.width = len(w)
-                num = int(w)
-                line_m.append(num)
-        self.matrix.append(copy.deepcopy(line_m))
-        self.height = len(self.matrix)
+
 
     def getMap(self):
 
@@ -47,14 +47,20 @@ class MapReader:
         self.height = i+1
         a = open(fname)
         lines = a.readline()
-        print(lines)
+
         self.width = len(lines.split())
-        print("height ", str(self.height))
-        print("wid ", str(self.width))
+
+
+    def transpose_map(self):
+        tmp = self.width
+        self.width = self.height
+        self.height = tmp
+        self.matrix.transpose()
+
 
 
 # test
-
-m = MapReader()
 filename="wumpus_map.txt"
-print(m.file_len(filename))
+m = MapReader(filename)
+
+m.getMap()

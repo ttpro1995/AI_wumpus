@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox  # must be explicitly import
 from PIL import Image
 from agents import *
+from search import *
 
 class AppGui:
     def __init__(self, master, env):
@@ -53,6 +54,9 @@ class AppGui:
 
         self.moveDown = Button(self.toolbar, text="Down", command=self.MoveDown)
         self.moveDown.grid(row = 1, column = 1)
+
+        self.testButtun = Button(self.toolbar, text="Test", command=self.testSearch)
+        self.testButtun.grid(row = 3, column = 1)
 
         self._widgets = []
         for r in range(0,self.env.x_end +1):
@@ -197,3 +201,13 @@ class AppGui:
         mes = "Hi " + textbox_text + "I am Pusheen the cat";
         messagebox.showinfo("Hi", mes)
 
+
+    def testSearch(self):
+        pos = self.agent.location
+        direct = self.agent.direction.direction
+        start = (pos,direct)
+        goal = (1,3)
+        allowed = [(1,1),(1,2),(1,3)]
+        problem = RouteProblem(start=start,goal=goal,allowed=allowed)
+        ret= aStarSearch(problem=problem)
+        print(ret)

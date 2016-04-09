@@ -18,9 +18,6 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-import sys
-from game import Directions
-from util import PriorityQueue, TraceBack
 from agents import Direction
 
 class SearchProblem:
@@ -108,7 +105,7 @@ class RouteProblem(SearchProblem):
         :return: True if (x,y) is desire destination
         '''
         position = state[0]
-        if position in self.allowed:
+        if position == self.goal:
             return True
         return False
 
@@ -143,10 +140,12 @@ class RouteProblem(SearchProblem):
                 action = TURN_LEFT
                 succ.append((nextState, action, cost))
 
-            if down_p is self.allowed:
+            if down_p in self.allowed or left_p in self.allowed : # turn right if right or behind is allow
                 nextState = (position,Direction.D)
                 action = TURN_RIGHT
                 succ.append((nextState, action, cost))
+
+
 
         if direction is Direction.L:
             if left_p in self.allowed:
@@ -159,7 +158,7 @@ class RouteProblem(SearchProblem):
                 action = TURN_LEFT
                 succ.append((nextState, action, cost))
 
-            if up_p is self.allowed:
+            if up_p in self.allowed or right_p in self.allowed:
                 nextState = (position, Direction.U)
                 action = TURN_RIGHT
                 succ.append((nextState, action, cost))
@@ -175,7 +174,7 @@ class RouteProblem(SearchProblem):
                 action = TURN_LEFT
                 succ.append((nextState, action, cost))
 
-            if right_p is self.allowed:
+            if right_p in self.allowed or down_p in self.allowed:
                 nextState = (position, Direction.R)
                 action = TURN_RIGHT
                 succ.append((nextState, action, cost))
@@ -191,7 +190,7 @@ class RouteProblem(SearchProblem):
                 action = TURN_LEFT
                 succ.append((nextState, action, cost))
 
-            if left_p is self.allowed:
+            if left_p in self.allowed or up_p in self.allowed:
                 nextState = (position, Direction.L)
                 action = TURN_RIGHT
                 succ.append((nextState, action, cost))

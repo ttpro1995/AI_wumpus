@@ -84,7 +84,7 @@ class RouteProblem(SearchProblem):
         :param start:((x,y),direction),
         (x,y): the real position of agent where it need to search route
         direction: real direction of agent
-        :param goal: where the agent need to go (the destination)
+        :param goal: set of goal positions
         :param allowed: an array of position (x,y) whether the agent is allowed to cross
         '''
 
@@ -105,8 +105,9 @@ class RouteProblem(SearchProblem):
         :return: True if (x,y) is desire destination
         '''
         position = state[0]
-        if position == self.goal:
-            return True
+        for p in self.goal:
+            if position == p:
+                return True
         return False
 
     def getSuccessors(self, state):
@@ -335,3 +336,8 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
+
+def plan_route(current,goal,allowed):
+    problem = RouteProblem(current,goal,allowed)
+    return aStarSearch(problem)

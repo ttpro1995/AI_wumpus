@@ -206,9 +206,8 @@ class AppGui:
     def testSearch(self):
         pos = self.agent.location
         direct = self.agent.direction.direction
-        start = (pos,direct)
-        goal = (1,3)
-        allowed = [(1,1),(1,2),(1,3)]
-        problem = RouteProblem(start=start,goal=goal,allowed=allowed)
-        ret= aStarSearch(problem=problem)
-        print(ret)
+        current = (pos,direct) # current position and current direction
+        goal = [(1,3),(1,4)] # set of goals position
+        allowed = [(1,1),(1,2),(1,3),(1,4)]
+        plan = plan_route(current,goal,allowed)
+        print(plan)

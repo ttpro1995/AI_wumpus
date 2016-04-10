@@ -59,6 +59,9 @@ class AppGui:
         self.testButtun = Button(self.toolbar, text="Test", command=self.testSearch)
         self.testButtun.grid(row = 3, column = 1)
 
+        self.stepButtun = Button(self.toolbar, text="Step", command=self.execute_step)
+        self.stepButtun.grid(row = 3, column = 2)
+
         self._widgets = []
         for r in range(0,self.env.x_end +1):
             cur_row = []
@@ -204,6 +207,8 @@ class AppGui:
         mes = "Hi " + textbox_text + "I am Pusheen the cat";
         messagebox.showinfo("Hi", mes)
 
+    def execute_step(self):
+        self.env.step()
 
     def testSearch(self):
         pos = self.agent.location

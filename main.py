@@ -1,24 +1,20 @@
 from agents import *
 from AppGui import *
 from wumpus_map import *
-
+from logic import *
 
 def main():
 
     map = MapReader("wumpus_map.txt")
 
+    explorer_kb = PropKB()
+    explorer_plan = []
+    mapsize = map.height
+    explorer_program = KB_AgentProgram(explorer_kb,explorer_plan,mapsize)
 
-    wumpus_env = WumpusEnvironment(agent_program=None, width=map.width+2, height=map.height+2, map_reader=map) #init the wumpus environment
 
-    # loop though
-    for i in range(wumpus_env.x_start,wumpus_env.x_end):
-        for j in range(wumpus_env.y_start,wumpus_env.y_end):
-            # print("At ",i ," ", j, " = ")
-            thing_list = wumpus_env.list_things_at((i,j))  # get array of thing at location (i,j)
-            thing_str = "" # string of thing's name
-            for thing in thing_list:
-                thing_str+= thing.__class__.__name__+"\n" # print string at current location
-            # print(thing_str)
+    wumpus_env = WumpusEnvironment(agent_program=explorer_program, width=map.width+2, height=map.height+2, map_reader=map) #init the wumpus environment
+
 
     # gui
     root = Tk()

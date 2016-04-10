@@ -41,6 +41,7 @@ import random
 import copy
 import collections
 
+
 # ______________________________________________________________________________
 
 
@@ -692,7 +693,7 @@ class WumpusEnvironment(XYEnvironment):
                     self.add_thing(Gold(),(x,y),True)
 
         "AGENT"
-        self.add_thing(Explorer(), (1, 1), True)
+        self.add_thing(Explorer(agent_program), (1, 1), True)
 
 
 

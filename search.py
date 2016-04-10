@@ -338,6 +338,4 @@ astar = aStarSearch
 ucs = uniformCostSearch
 
 
-def plan_route(current,goal,allowed):
-    problem = RouteProblem(current,goal,allowed)
-    return aStarSearch(problem)
+

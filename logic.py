@@ -26,6 +26,7 @@ And a few other functions:
 
 from utils import *  # noqa
 import agents
+from search import *
 
 import itertools
 import re
@@ -818,7 +819,8 @@ class HybridWumpusAgent(agents.Agent):
 
 
 def plan_route(current, goals, allowed):
-    unimplemented()
+    problem = RouteProblem(current,goals,allowed)
+    return aStarSearch(problem)
 
 # ______________________________________________________________________________
 

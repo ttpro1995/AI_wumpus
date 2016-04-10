@@ -3,6 +3,7 @@ from tkinter import messagebox  # must be explicitly import
 from PIL import Image
 from agents import *
 from search import *
+from logic import *
 
 class AppGui:
     def __init__(self, master, env):
@@ -82,6 +83,7 @@ class AppGui:
     def updateGUI(self):
         print(self.agent.location)
         print(self.agent.direction.direction)
+        print(self.env.percepts_from(self.agent, self.agent.location))
         # if (self.agent.direction.direction == Direction.R):
         #     print('R')
         # if (self.agent.direction.direction == Direction.L):

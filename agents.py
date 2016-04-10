@@ -300,7 +300,7 @@ class Environment(object):
         for it. (Shouldn't need to override this."""
         if not isinstance(thing, Thing):
             thing = Agent(thing)
-        assert thing not in self.things, "Don't add the same thing twice"+thing.__class__.__name__
+        assert thing not in self.things, "Don't add the same thing twice"
         thing.location = location if location is not None else self.default_location(thing)
         self.things.append(thing)
         if isinstance(thing, Agent):

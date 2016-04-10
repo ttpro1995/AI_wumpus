@@ -31,6 +31,7 @@ from search import *
 import itertools
 import re
 from collections import defaultdict
+import GenerateSentence
 
 # TODO: Fix the precedence of connectives in expr()
 
@@ -87,6 +88,7 @@ class PropKB(KB):
         if tt_entails(Expr('&', *self.clauses), query):
             yield {}
 
+
     def ask_if_true(self, query):
         "Return True if the KB entails query, else return False."
         if self.ask_generator(query) == {}:
@@ -106,26 +108,44 @@ class PropKB(KB):
 def KB_AgentProgram(KB):
     """A generic logical knowledge-based agent program. [Fig. 7.1]"""
     steps = itertools.count()
+    pass  # I have no ideal
+    # def program(percept):
+    #     t = next(steps)
+    #     KB.tell(make_percept_sentence(percept, t))
+    #     action = KB.ask(make_action_query(t))
+    #     KB.tell(make_action_sentence(action, t))
+    #     return action
+    #
+    # def make_percept_sentence(percept, t):
+    #     percepts_list = ['Stench', 'Breeze', 'Glitter', 'Bump', 'Scream']
+    #     axiom = []
+    #     check = [False,False,False,False,False]
+    #     for p in percept:
+    #         p_name = p.__class__.__name__
+    #         for i in range(len(percepts_list)):
+    #             if p_name == percepts_list[i]:
+    #                 check[i] = True;
+    #     for i in range(len(check)):
+    #         if check[i]:
+    #             str_axiom = percepts_list[i]+str(t)
+    #             axiom.append(Expr(str_axiom))
+    #         else:
+    #             str_axiom = percepts_list[i]+str(t)
+    #             axiom.append(~Expr(str_axiom))
+    #
+    #     conj = conj_axiom_list(axiom)
+    #     return conj
+    #
+    #
+    #
+    # def make_action_query(t):
+    #     pass
+    #
+    # def make_action_sentence(action, t):
+    #     pass
+    #
+    # return program
 
-    def program(percept):
-        t = next(steps)
-        KB.tell(make_percept_sentence(percept, t))
-        action = KB.ask(make_action_query(t))
-        KB.tell(make_action_sentence(action, t))
-        return action
-
-    def make_percept_sentence(self, percept, t):
-        return Expr("Percept")(percept, t)
-
-    def make_action_query(self, t):
-        return expr("ShouldDo(action, {})".format(t))
-
-    def make_action_sentence(self, action, t):
-        return Expr("Did")(action[expr('action')], t)
-
-    return program
-
-# ______________________________________________________________________________
 
 
 class Expr:
@@ -814,8 +834,90 @@ class HybridWumpusAgent(agents.Agent):
 
     "An agent for the wumpus world that does logical inference. [Fig. 7.20]"""
 
-    def __init__(self):
-        unimplemented()
+    def __init__(self, mapsize):
+        self.kb = PropKB()
+        self.mapsize = mapsize
+        self.timecounter = 0;
+        bs_logic = GenerateSentence.genBreezeStenchLogic(self.mapsize)
+        one_wumpus_logic = GenerateSentence.genOneWumpusExistLogic(self.mapsize)
+        self.kb.tell(bs_logic)
+        self.kb.tell(one_wumpus_logic)
+        self.plan = []
+
+
+
+
+
+    def step(self, percept):
+        current = (1,1) # current position
+        self.timecounter += 1
+        self.kb.tell(self.make_percept_sentence(percept,self.timecounter))
+        safe = []
+        unvisited = []
+        for x in range(self.mapsize):
+            for y in range(self.mapsize):
+                if self.isSafe(x,y):
+                    safe.append((x,y)) # append safe location to safe list
+
+        # if ASK(KB, Glitter t) = true then
+
+        # unvisited ← {[x, y] : ASK(KB, Lt x,y  ) = false for all t ≤ t}
+        if not self.plan: # if plan is empty
+            for t_prim in range(self.timecounter+1):
+                for x in range(self.mapsize):
+                     for y in range(self.mapsize):
+                        L_xyt = Expr("L{}_{}_{}".format(x, y, t_prim))
+                        r = self.kb.ask(L_xyt)
+                        if r is False: # don't change "r is False" to "not r", it will not work
+                            unvisited.append((x, y))
+                        elif t_prim == self.timecounter:
+                            current = (x,y)  # L_xyt is true where t = current time
+            # plan ← PLAN-ROUTE(current, unvisited ∩ safe, safe)
+            unvisited_safe = []
+            for s in safe:
+                if s in unvisited:
+                    unvisited_safe.append(s)
+            new_plan = plan_route(current,unvisited_safe,safe)
+            self.plan.append(new_plan)
+
+        if not self.plan:
+            new_plan = plan_route(current,[(1,1)],safe)
+            self.plan.append(new_plan)
+
+        return self.plan.pop() 
+
+
+
+
+    def make_percept_sentence(percept, t):
+        percepts_list = ['Stench', 'Breeze', 'Glitter', 'Bump', 'Scream']
+        axiom = []
+        check = [False,False,False,False,False]
+        for p in percept:
+            p_name = p.__class__.__name__
+            for i in range(len(percepts_list)):
+                if p_name == percepts_list[i]:
+                    check[i] = True;
+        for i in range(len(check)):
+            if check[i]:
+                str_axiom = percepts_list[i]+str(t)
+                axiom.append(Expr(str_axiom))
+            else:
+                str_axiom = percepts_list[i]+str(t)
+                axiom.append(~Expr(str_axiom))
+
+        conj = conj_axiom_list(axiom)
+        return conj
+
+    def isSafe(self,x,y):
+        OK_xyt = Expr('OK{}_{}_{}'.format(x, y, self.timecounter))
+        r = self.kb.ask(OK_xyt)
+        if r is not False: # ask return {}, but {} is not True also
+            return True
+        else:
+            return False  # ask return False when the logic false
+        return r
+
 
 
 def plan_route(current, goals, allowed):
@@ -1150,8 +1252,31 @@ def d(y, x):
 # These functions print their arguments in a standard order
 # to compensate for the random order in the standard representation
 
+'''
+conjunction and disjunction list
 
+example
+l.append(Expr('A'))
+l.append(Expr('D'))
+l.append(Expr('C'))
+l.append(Expr('B'))
 
+E = conj_axiom_list(l)
+print(E)
+'''
+def conj_axiom_list(axiom_list):
+    r = axiom_list[0]
+    for a in axiom_list:
+        if a is not r:
+            r = r & a
+    return  r
+
+def disj_axiom_list(axiom_list):
+    r = axiom_list[0]
+    for a in axiom_list:
+        if a is not r:
+            r = r | a
+    return  r
 
 
 

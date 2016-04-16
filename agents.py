@@ -113,6 +113,12 @@ def TraceAgent(agent):
 
 # ______________________________________________________________________________
 
+def AlwaysForwardProgram():
+    def program(pecrept):
+        print(pecrept)
+        action = "Forward"
+        return action
+    return program
 
 def TableDrivenAgentProgram(table):
     """This agent selects an action based on the percept sequence.
@@ -766,11 +772,11 @@ class WumpusEnvironment(XYEnvironment):
             Result format: [Left, Right, Up, Down, Center / Current location]'''
         x,y = agent.location
         result = []
-        result.append(self.percepts_from(agent, (x - 1,y)))
-        result.append(self.percepts_from(agent, (x + 1,y)))
-        result.append(self.percepts_from(agent, (x,y - 1)))
-        result.append(self.percepts_from(agent, (x,y + 1)))
-        result.append(self.percepts_from(agent, (x,y)))
+        # result.append(self.percepts_from(agent, (x - 1,y)))
+        # result.append(self.percepts_from(agent, (x + 1,y)))
+        # result.append(self.percepts_from(agent, (x,y - 1)))
+        # result.append(self.percepts_from(agent, (x,y + 1)))
+        result = self.percepts_from(agent, (x,y))
 
         '''The wumpus gives out a a loud scream once it's killed.'''
         wumpus = [thing for thing in self.things if isinstance(thing, Wumpus)]

@@ -12,8 +12,9 @@ def main():
     mapsize = map.height
     explorer_program = KB_AgentProgram(explorer_kb,explorer_plan,mapsize)
 
+    forward_program = AlwaysForwardProgram()
 
-    wumpus_env = WumpusEnvironment(agent_program=explorer_program, width=map.width+2, height=map.height+2, map_reader=map) #init the wumpus environment
+    wumpus_env = WumpusEnvironment(agent_program=forward_program, width=map.width+2, height=map.height+2, map_reader=map) #init the wumpus environment
 
 
     # gui

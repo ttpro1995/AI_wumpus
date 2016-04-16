@@ -122,10 +122,20 @@ def KB_AgentProgram(KB,plan,mapsize):
         print(percept)
         t = next(steps)
         current = (1, 1)  # current position
+
+
+        KB.tell(GenerateSentence.genBreezeStenchLogic(mapsize))
+
+        #  if ASK(KB, Glitter t) = true then
+        #  plan ← [Grab] + PLAN - ROUTE(current, {[1, 1]}, safe) + [Climb]
+
+
+        # TELL(KB, MAKE-PERCEPT-SENTENCE(percept, t))
         KB.tell(make_percept_sentence(percept, t))
         safe = []
         unvisited = []
 
+        # safe ← {[x, y] : ASK(KB, OK t x,y) = true}
         for x in range(mapsize):
             for y in range(mapsize):
                 if isSafe(x, y, t):
@@ -936,37 +946,37 @@ def WalkSAT(clauses, p=0.5, max_flips=10000):
 #
 #         return self.plan.pop()
 #
-
-
-
-    def make_percept_sentence(percept, t):
-        percepts_list = ['Stench', 'Breeze', 'Glitter', 'Bump', 'Scream']
-        axiom = []
-        check = [False,False,False,False,False]
-        for p in percept:
-            p_name = p.__class__.__name__
-            for i in range(len(percepts_list)):
-                if p_name == percepts_list[i]:
-                    check[i] = True;
-        for i in range(len(check)):
-            if check[i]:
-                str_axiom = percepts_list[i]+str(t)
-                axiom.append(Expr(str_axiom))
-            else:
-                str_axiom = percepts_list[i]+str(t)
-                axiom.append(~Expr(str_axiom))
-
-        conj = conj_axiom_list(axiom)
-        return conj
-
-    def isSafe(self,x,y):
-        OK_xyt = Expr('OK{}_{}_{}'.format(x, y, self.timecounter))
-        r = self.kb.ask(OK_xyt)
-        if r is not False: # ask return {}, but {} is not True also
-            return True
-        else:
-            return False  # ask return False when the logic false
-        return r
+    #
+    #
+    #
+    # def make_percept_sentence(percept, t):
+    #     percepts_list = ['Stench', 'Breeze', 'Glitter', 'Bump', 'Scream']
+    #     axiom = []
+    #     check = [False,False,False,False,False]
+    #     for p in percept:
+    #         p_name = p.__class__.__name__
+    #         for i in range(len(percepts_list)):
+    #             if p_name == percepts_list[i]:
+    #                 check[i] = True;
+    #     for i in range(len(check)):
+    #         if check[i]:
+    #             str_axiom = percepts_list[i]+str(t)
+    #             axiom.append(Expr(str_axiom))
+    #         else:
+    #             str_axiom = percepts_list[i]+str(t)
+    #             axiom.append(~Expr(str_axiom))
+    #
+    #     conj = conj_axiom_list(axiom)
+    #     return conj
+    #
+    # def isSafe(self,x,y):
+    #     OK_xyt = Expr('OK{}_{}_{}'.format(x, y, self.timecounter))
+    #     r = self.kb.ask(OK_xyt)
+    #     if r is not False: # ask return {}, but {} is not True also
+    #         return True
+    #     else:
+    #         return False  # ask return False when the logic false
+    #     return r
 
 
 

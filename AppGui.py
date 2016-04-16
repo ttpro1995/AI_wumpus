@@ -86,7 +86,7 @@ class AppGui:
     def updateGUI(self):
         print(self.agent.location)
         print(self.agent.direction.direction)
-        print(self.env.percepts_from(self.agent, self.agent.location))
+
         # if (self.agent.direction.direction == Direction.R):
         #     print('R')
         # if (self.agent.direction.direction == Direction.L):
@@ -209,6 +209,7 @@ class AppGui:
 
     def execute_step(self):
         self.env.step()
+        self.updateGUI()
 
     def testSearch(self):
         pos = self.agent.location

@@ -1,0 +1,74 @@
+#Breeze around Pit
+B11 % (P12 | P21)
+B12 % (P13 | P22)
+B13 % (P12 | P23)
+B21 % (P31 | P22)
+B22 % (P12 | P21 | P32 | P23)
+B23 % (P22 | P13 | P33)
+B31 % (P21 | P32)
+B32 % (P31 | P22 | P33)
+B33 % (P32 | P23)
+
+#...
+#Stench around Wumpus
+S11 % (W12 | W21)
+S12 % (W13 | W22)
+S13 % (W12 | W23)
+S21 % (W31 | W22)
+S22 % (W12 | W21 | W32 | W23)
+S23 % (W22 | W13 | W33)
+S31 % (W21 | W32)
+S32 % (W31 | W22 | W33)
+S33 % (W32 | W23)
+
+#...
+#one and only one Wumpus in the world
+W11 | W12 | W13 | W21 | W22 | W23 | W31 | W32 | W33
+~W11|~W12
+~W12|~W13
+~W21|~W22
+~W22|~W13
+~W31|~W32
+~W32|~W33
+~W21|~W11
+~W22|~W12
+~W23|~W13
+~W31|~W21
+~W32|~W22
+~W33|~W23
+
+#...
+#conect percept to knowledge as long as alive
+#L_xyt >> (Breeze_t % B_xy)
+#L_xyt >> (Stench_t % S_xy)
+L110 >> (Breeze0 % B11)
+
+#need to make other sencetence for all PERCEPT: Stench_t, Breeze_t, Glitter_t, Bump_t, Screem_t
+#...
+#change in world when apply ation:
+L110 & FaceEast0 & Forward0 >> L121 & ~L111
+
+#need to make other sencetence for all ACTION: Grab_t, Shoot_t, Climb_t, TurnLeft_t, TurnRight_t
+#...
+#SUCCESSOR STATE AXIOM:
+L11_t % ((L11_t & (~Forward_t | Bump_t)) | (L12_t & (~Forward_t & South_t)) | (L21_t & (~Forward_t & West_t)))
+
+#F_t+1 % (listOf(ActionCauseF_t) | listOf(F_t & ActionCauseNotF_t))
+#same for F_t+1 = HaveArrow_t+1, WumpusAlive_t+1 
+#...
+OK_xyt % ~P_xy & ~(Wxy & WumpusAlive_t)
+
+#safe square
+#...
+#Example of Percept Sentence
+~Stench1 & Breeze1 & ~Glitter1 & Bump1 & Screem1
+
+#...
+#Example of Action Sentence
+Forward1
+TurnLeft2
+TurnRight3
+Grab4
+Shoot5
+Climb6
+

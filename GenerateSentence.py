@@ -1,13 +1,17 @@
 from collections import defaultdict
 from logic import *
 
+
+
+
+
 def pp(l):
     for i in l:
         print(i)
 
 #No Wumpus or Pit at location 1,1
 #def axiom_generator_initial_location_assertions(x, y):
-def genInitSafeLoctionLogic(xInit,yInit):
+def genInitSafeLoctionLogic(xInit, yInit):
     WumpusInit = Expr("W{}_{}".format(xInit,yInit))
     PitInit = Expr("P{}_{}".format(xInit,yInit))
     return ~(WumpusInit | PitInit)
@@ -89,14 +93,14 @@ def genBreezeStenchLogic(mapsize):
             if (list_Pit_expr):
                 dis_expr = list_Pit_expr[0]
                 for e in list_Pit_expr: # disjuntion pit
-                    dis_expr = Expr(dis_expr|e)
+                    dis_expr = dis_expr|e
                 sum_pit = B_xy % dis_expr
                 l.append(sum_pit)  #  B11 % (P12 | P21 | ...)
 
             if (list_Wumpus_expr):
                 dis_expr = list_Pit_expr[0]
                 for e in list_Wumpus_expr:  # disjuntion wumpus
-                    dis_expr = Expr(dis_expr | e)
+                    dis_expr = dis_expr | e
                 sum_wumpus = S_xy % dis_expr
                 l.append(sum_wumpus)  # S11 % (W12 | W21 | ...)
 
@@ -137,7 +141,7 @@ def genOneWumpusExistLogic(mapsize):
             if i + 1 <= mapsize and check[(i, j)][(i+1, j)] == False:
                 A = ~Expr("W{}_{}".format(i, j))
                 B = ~Expr("W{}_{}".format(i+1, j))
-                disAB = Expr(A|B)
+                disAB = A|B # no Expr( )
                 l.append(disAB)
                 # l.append("~W{}_{}".format(i,j) + " | " + "~W{}_{}".format(i+1,j))
                 check[(i, j)][(i+1, j)] = True
@@ -146,7 +150,7 @@ def genOneWumpusExistLogic(mapsize):
             if j - 1 >= 1 and check[(i, j)][(i, j-1)] == False:
                 A = ~Expr("W{}_{}".format(i, j))
                 B = ~Expr("W{}_{}".format(i, j-1))
-                disAB = Expr(A | B)
+                disAB = A | B # no Expr( )
                 l.append(disAB)
                 # l.append("~W{}_{}".format(i,j) + " | " + "~W{}_{}".format(i,j-1))
                 check[(i,j)][(i,j-1)] = True
@@ -155,7 +159,7 @@ def genOneWumpusExistLogic(mapsize):
             if j + 1 <= mapsize and check[(i, j)][(i, j+1)] == False:
                 A = ~Expr("W{}_{}".format(i, j))
                 B = ~Expr("W{}_{}".format(i, j+1))
-                disAB = Expr(A|B)
+                disAB = A|B
                 l.append(disAB)
                 #l.append("~W{}_{}".format(i,j) + " | " + "~W{}_{}".format(i,j+1))
                 check[(i, j)][(i, j+1)] = True
@@ -164,7 +168,7 @@ def genOneWumpusExistLogic(mapsize):
     if exist: # Wxy | Wxy | Wxy ...
         dis_Wxy = exist[0]
         for e in exist:
-            dis_Wxy = Expr(dis_Wxy|e)
+            dis_Wxy = dis_Wxy|e
         l.append(dis_Wxy)
     #l.append(" | ".join(str(i) for i in exist))
     return l
@@ -261,7 +265,9 @@ def genOnlyOneLoctionAtTime(xcur, ycur, mapsize, t = 0):
             else:
                 notLocation.append(" ~L{}_{}_{}".format(i,j,t))
     l = expr(location + "(" + "&".join(notLocation) + ")")
-    return l
+    r = []
+    r.append(l)
+    return r
 
 #print(genOnlyOneLoctionAtTime(1,2,3,0))
 
@@ -271,14 +277,16 @@ def genOnlyOneHeadingAtTime(heading, t = 0):
     notHeading = []
     for h in headingList:
         if h.upper() == heading.upper():
-            axiom_str += 'Heading' + h + str(t)
+            axiom_str += 'Facing' + h + str(t)
         else:
-            notHeading.append('~Heading' + h + str(t))
+            notHeading.append('~Facing' + h + str(t))
     axiom_str += ' >> ('
     axiom_str += ' & '.join(notHeading)
     axiom_str += ')'
-
-    return axiom_str
+    e = expr(axiom_str)
+    l = []
+    l.append(e)
+    return l
 
 #print(genOnlyOneHeadingAtTime("North",0))
 
@@ -288,7 +296,13 @@ def genHaveArrowAndWumpusAlive(t = 0):
 
     t := time; default=0
     """
-    return "HaveArrow{}".format(t) + ' & ' + "WumpusAlive{}".format(t)
+    have_arrow = Expr("HaveArrow{}".format(t))
+    wumpus_alive = Expr("WumpusAlive{}".format(t))
+    ret = []
+    a = have_arrow & wumpus_alive
+    ret.append(a)
+    # return "HaveArrow{}".format(t) + ' & ' + "WumpusAlive{}".format(t)
+    return ret # must return a list
 
 
 def initial_wumpus_axioms(xInit, yInit, mapsize, heading):
@@ -348,8 +362,12 @@ def axiom_generator_at_location_ssa( x, y,mapsize, t):
 
     axiom_str += " | ".join(succ_locations)
     axiom_str += ")"
+    e  = expr(axiom_str)
+    l=[]
+    l.append(e)
+    return l
 
-    return axiom_str
+
 
 def generate_at_location_ssa(t, x, y, mapsize, heading):
     """
@@ -385,8 +403,12 @@ def axiom_generator_have_arrow_ssa(t):
 
     t := time
     """
-    return "HaveArror{}".format(t+1) +  " % (" + "HaveArrow{}".format(t) +\
-           " & ~" + "Shoot{}".format(t) + ")"
+    e  = expr("HaveArror{}".format(t+1) +  " % (" + "HaveArrow{}".format(t) +\
+           " & ~" + "Shoot{}".format(t) + ")")
+    l=[]
+    l.append(e)
+    return l
+
 
 def axiom_generator_wumpus_alive_ssa(t):
     """
@@ -399,8 +421,12 @@ def axiom_generator_wumpus_alive_ssa(t):
 
     t := time
     """
-    return  "WumpusAlive".format(t+1) + " % (" + "WumpusAlive".format(t) +\
-            " & ~" + "Screem{}".format(t+1)
+    e = expr("WumpusAlive".format(t+1) + " % (" + "WumpusAlive".format(t) +\
+            " & ~" + "Screem{}".format(t+1))
+    l=[]
+    l.append(e)
+    return l
+
 
 #----------------------------------
 
@@ -419,7 +445,11 @@ def axiom_generator_heading_north_ssa(t):
     axiom_str += "FacingWest{}".format(t) + " & " + "TurnRight{}".format(t) + "))"
     # Comment or delete the next line once this function has been implemented.
     # utils.print_not_implemented()
-    return axiom_str
+    e= expr(axiom_str)
+    l=[]
+    l.append(e)
+    return l
+
 
 def axiom_generator_heading_east_ssa(t):
     """
@@ -433,7 +463,11 @@ def axiom_generator_heading_east_ssa(t):
                  + "TurnRight{}".format(t) + " & ~" + "TurnLeft{}".format(t) + ") | "
     axiom_str += "FacingSouth{}".format(t) + " & " + "TurnLeft{}".format(t) + ") | "
     axiom_str += "FacingNorth{}".format(t) + " & " + "TurnRight{}".format(t) + "))"
-    return axiom_str
+    e = expr(axiom_str)
+    l=[]
+    l.append(e)
+    return l
+
 
 def axiom_generator_heading_south_ssa(t):
     """
@@ -447,7 +481,12 @@ def axiom_generator_heading_south_ssa(t):
                  + "TurnRight{}".format(t) + " & ~" + "TurnLeft{}".format(t) + ") | "
     axiom_str += "FacingWest{}".format(t) + " & " + "TurnLeft{}".format(t) + ") | "
     axiom_str += "FacingEast{}".format(t) + " & " + "TurnRight{}".format(t) + "))"
-    return axiom_str
+
+    e = expr(axiom_str)
+    l=[]
+    l.append(e)
+    return l
+
 
 def axiom_generator_heading_west_ssa(t):
     """
@@ -461,7 +500,11 @@ def axiom_generator_heading_west_ssa(t):
                  + "TurnRight{}".format(t) + " & ~" + "TurnLeft{}".format(t) + ") | "
     axiom_str += "FacingNorth{}".format(t) + " & " + "TurnLeft{}".format(t) + ") | "
     axiom_str += "FacingSouth{}".format(t) + " & " + "TurnRight{}".format(t) + "))"
-    return axiom_str
+    e = expr(axiom_str)
+    l=[]
+    l.append(e)
+    return l
+
 
 def generate_heading_ssa(t):
     """
@@ -543,7 +586,10 @@ def axiom_generator_only_one_action_axioms(t):
 
     axiom_str = "("+ '|'.join(axiom_str_arr) + ")&"
     axiom_str += "(" + ' & '.join(axioms) + ")"
-    return axiom_str
+    e = expr(axiom_str)
+    l = []
+    l.append(e)
+    return l
 
 
 def generate_mutually_exclusive_axioms(t):
@@ -559,5 +605,8 @@ def generate_mutually_exclusive_axioms(t):
     axioms.append(axiom_generator_only_one_action_axioms(t))
 
     return filter(lambda s: s != '', axioms)
+
+
+
 
 #------------------------------------------------------------------

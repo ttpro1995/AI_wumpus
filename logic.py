@@ -32,6 +32,9 @@ import itertools
 import re
 from collections import defaultdict
 import GenerateSentence
+from time import *
+
+
 
 # TODO: Fix the precedence of connectives in expr()
 
@@ -39,6 +42,8 @@ import GenerateSentence
 
 
 class KB:
+
+
 
     """A knowledge base to which you can tell and ask sentences.
     To create a KB, first subclass this class and implement
@@ -49,6 +54,8 @@ class KB:
     such as {x: Cain, y: Abel}, {x: Abel, y: Cain}, {x: George, y: Jeb}, etc.
     So ask_generator generates these one at a time, and ask either returns the
     first one or returns False."""
+
+
 
     def __init__(self, sentence=None):
         raise NotImplementedError
@@ -104,110 +111,6 @@ class PropKB(KB):
 
 # ______________________________________________________________________________
 
-
-def KB_AgentProgram(KB,plan,mapsize):
-    """A generic logical knowledge-based agent program. [Fig. 7.1]
-
-    inputs: percept, a list, [stench,breeze,glitter,bump,scream]
-
-    persistent: KB, a knowledge base, initially the atemporal “wumpus physics”
-                t, a counter, initially 0, indicating time
-                plan, an action sequence, initially empty
-    """
-    steps = itertools.count()
-
-
-    def program(percept):
-        print("start program with percept ")
-        print(percept)
-        t = next(steps)
-        current = (1, 1)  # current position
-
-
-        KB.tell(GenerateSentence.genBreezeStenchLogic(mapsize))
-
-        #  if ASK(KB, Glitter t) = true then
-        #  plan ← [Grab] + PLAN - ROUTE(current, {[1, 1]}, safe) + [Climb]
-
-
-        # TELL(KB, MAKE-PERCEPT-SENTENCE(percept, t))
-        KB.tell(make_percept_sentence(percept, t))
-        safe = []
-        unvisited = []
-
-        # safe ← {[x, y] : ASK(KB, OK t x,y) = true}
-        for x in range(mapsize):
-            for y in range(mapsize):
-                if isSafe(x, y, t):
-                    safe.append((x, y))  # append safe location to safe list
-
-        # if ASK(KB, Glitter t) = true then
-
-        # unvisited ← {[x, y] : ASK(KB, Lt x,y  ) = false for all t ≤ t}
-        if not plan:  # if plan is empty
-            for t_prim in range(t + 1):
-                for x in range(mapsize):
-                    for y in range(mapsize):
-                        L_xyt = Expr("L{}_{}_{}".format(x, y, t_prim))
-                        r = KB.ask(L_xyt)
-                        if r is False:  # don't change "r is False" to "not r", it will not work
-                            unvisited.append((x, y))
-                        elif t_prim == t:
-                            current = (x, y)  # L_xyt is true where t = current time
-            # plan ← PLAN-ROUTE(current, unvisited ∩ safe, safe)
-            unvisited_safe = []
-            for s in safe:
-                if s in unvisited:
-                    unvisited_safe.append(s)
-            new_plan = plan_route(current, unvisited_safe, safe)
-            plan.append(new_plan)
-
-        if not plan:
-            new_plan = plan_route(current, [(1, 1)], safe)
-            plan.append(new_plan)
-
-        return plan.pop()
-
-    def make_percept_sentence(percept, t):
-        percepts_list = ['Stench', 'Breeze', 'Glitter', 'Bump', 'Scream']
-        axiom = []
-        check = [False, False, False, False, False]
-        for p in percept:
-            p_name = p.__class__.__name__
-            for i in range(len(percepts_list)):
-                if p_name == percepts_list[i]:
-                    check[i] = True;
-        for i in range(len(check)):
-            if check[i]:
-                str_axiom = percepts_list[i] + str(t)
-                axiom.append(Expr(str_axiom))
-            else:
-                str_axiom = percepts_list[i] + str(t)
-                axiom.append(~Expr(str_axiom))
-
-        conj = conj_axiom_list(axiom)
-        return conj
-
-    def isSafe(x, y, t):
-        OK_xyt = Expr('OK{}_{}_{}'.format(x, y, t))
-        r = KB.ask(OK_xyt)
-        if r is not False:  # ask return {}, but {} is not True also
-            return True
-        else:
-            return False  # ask return False when the logic false
-        return r
-
-
-    def make_action_query(t):
-        pass
-
-    def make_action_sentence(action, t):
-        pass
-
-    return program
-
-
-
 class Expr:
 
     """A symbolic mathematical expression.  We use this class for logical
@@ -261,8 +164,11 @@ class Expr:
         assert is_symbol(self.op) and not self.args
         return Expr(self.op, *args)
 
+
     def __repr__(self):
         "Show something like 'P' or 'P(x, y)', or '~P' or '(P | Q | R)'"
+        if str(self.args).__contains__("L2_1_0"):
+            print(self.args)
         if not self.args:         # Constant or proposition with arity 0
             return str(self.op)
         elif is_symbol(self.op):  # Functional or propositional operator
@@ -340,6 +246,7 @@ def expr(s):
     is ((P & (Q >> R)) & S); so you must use expr('(P & Q) ==> (R & S)').
     """
     if isinstance(s, Expr):
+        print(s)
         return s
     if isnumber(s):
         return Expr(s)
@@ -980,8 +887,8 @@ def WalkSAT(clauses, p=0.5, max_flips=10000):
 
 
 
-def plan_route(current, goals, allowed):
-    problem = RouteProblem(current,goals,allowed)
+def plan_route(current, heading, goals, allowed):
+    problem = RouteProblem((current[0],current[1],heading),goals,allowed)
     ret = aStarSearch(problem)
     return ret
 
@@ -1325,21 +1232,3 @@ l.append(Expr('B'))
 E = conj_axiom_list(l)
 print(E)
 '''
-def conj_axiom_list(axiom_list):
-    r = axiom_list[0]
-    for a in axiom_list:
-        if a is not r:
-            r = r & a
-    return  r
-
-def disj_axiom_list(axiom_list):
-    r = axiom_list[0]
-    for a in axiom_list:
-        if a is not r:
-            r = r | a
-    return  r
-
-
-
-# ________________________________________________________________________
-
